@@ -1,15 +1,17 @@
-import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/app_routes.dart';
 import 'view/first_view.dart';
+import 'view/home_view.dart';
 import 'view/log_in_view.dart';
 import 'view/sign_up_view.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const MyApp());
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatefulWidget {
@@ -56,15 +58,14 @@ class _MyAppState extends State<MyApp> {
       routes: {
         AppRoutes.signUp: (_) => const SignUpView(),
         AppRoutes.logIn: (_) => const LogInView(),
+        AppRoutes.home: (_) => const HomeView(),
       },
       home: FutureBuilder<FirebaseApp>(
         future: _initialization,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Scaffold(
-              body: Center(
-                child: CircularProgressIndicator(),
-              ),
+              body: Center(child: CircularProgressIndicator()),
             );
           }
 

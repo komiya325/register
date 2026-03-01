@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/app_routes.dart';
+import '../provider/auth_provider.dart';
 
-class LogInView extends StatelessWidget {
+class LogInView extends ConsumerWidget {
   const LogInView({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final lineColor = const Color(0xFFD4DAE4);
-    final mutedText = const Color(0xFF8A9AB3);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(loginViewModelProvider);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F6F8),
@@ -32,7 +33,7 @@ class LogInView extends StatelessWidget {
                       width: 60,
                       height: 60,
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.84),
+                        color: Colors.white.withValues(alpha: 0.84),
                         shape: BoxShape.circle,
                       ),
                       child: IconButton(
@@ -48,7 +49,7 @@ class LogInView extends StatelessWidget {
               ],
             ),
             Transform.translate(
-              offset: const Offset(0, -36),
+              offset: const Offset(0, -34),
               child: Container(
                 width: double.infinity,
                 decoration: const BoxDecoration(
@@ -56,12 +57,12 @@ class LogInView extends StatelessWidget {
                   borderRadius: BorderRadius.vertical(top: Radius.circular(40)),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(28, 24, 28, 34),
+                  padding: const EdgeInsets.fromLTRB(28, 28, 28, 34),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       const Text(
-                        'おかえりなさい',
+                        'ログイン',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 30,
@@ -70,119 +71,91 @@ class LogInView extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 10),
-                      Text(
-                        '登録済みアカウントでサインインしましょう。',
+                      const Text(
+                        '登録済みのGoogleアカウントでログインします。',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 16,
-                          color: mutedText,
-                          height: 1.35,
+                          color: Color(0xFF8A9AB3),
                         ),
                       ),
                       const SizedBox(height: 34),
-                      _LineInputField(label: 'メールアドレス', lineColor: lineColor),
-                      const SizedBox(height: 24),
-                      _LineInputField(
-                        label: 'パスワード',
-                        lineColor: lineColor,
-                        suffixIcon: const Icon(
-                          Icons.visibility_off_outlined,
-                          color: Color(0xFF93A1B8),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: TextButton(
-                          onPressed: () {},
-                          child: const Text(
-                            'パスワードを忘れた場合',
-                            style: TextStyle(
-                              color: Color(0xFF9AA8BE),
-                              fontSize: 13,
-                            ),
-                          ),
-                        ),
-                      ),
                       SizedBox(
-                        height: 64,
-                        child: ElevatedButton(
-                          onPressed: () {},
+                        height: 62,
+                        child: ElevatedButton.icon(
+                          onPressed:
+                              state.isLoading
+                                  ? null
+                                  : () async {
+                                    final ok =
+                                        await ref
+                                            .read(
+                                              loginViewModelProvider.notifier,
+                                            )
+                                            .loginWithGoogle();
+                                    if (ok && context.mounted) {
+                                      Navigator.pushNamedAndRemoveUntil(
+                                        context,
+                                        AppRoutes.home,
+                                        (route) => false,
+                                      );
+                                    }
+                                  },
+                          icon: const Icon(Icons.g_mobiledata, size: 32),
+                          label:
+                              state.isLoading
+                                  ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                  : const Text(
+                                    'Googleでログイン',
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
                           style: ElevatedButton.styleFrom(
                             elevation: 0,
                             backgroundColor: const Color(0xFFF0E8CD),
                             foregroundColor: const Color(0xFF1B223B),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(34),
-                            ),
-                          ),
-                          child: const Text(
-                            'ログインする  →',
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 0.2,
+                              borderRadius: BorderRadius.circular(32),
                             ),
                           ),
                         ),
                       ),
-                      const SizedBox(height: 34),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Divider(color: lineColor, thickness: 1.1),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 18),
-                            child: Text(
-                              'または連携',
-                              style: TextStyle(
-                                color: mutedText,
-                                fontSize: 14,
-                                letterSpacing: 2.2,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                            child: Divider(color: lineColor, thickness: 1.1),
-                          ),
-                        ],
-                      ),
+                      const SizedBox(height: 14),
+                      if (state.errorMessage != null)
+                        Text(
+                          state.errorMessage!,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(color: Colors.redAccent),
+                        ),
                       const SizedBox(height: 20),
-                      const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          _SocialCircle(icon: Icons.g_mobiledata),
-                          SizedBox(width: 22),
-                          _SocialCircle(icon: Icons.apple),
-                        ],
-                      ),
-                      const SizedBox(height: 26),
-                      Center(
-                        child: TextButton(
-                          onPressed:
-                              () => Navigator.pushNamed(
-                                context,
-                                AppRoutes.signUp,
-                              ),
-                          child: const Text.rich(
-                            TextSpan(
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Color(0xFF8A9AB3),
-                              ),
-                              children: [
-                                TextSpan(text: 'まだ会員ではないですか？ '),
-                                TextSpan(
-                                  text: '新規登録',
-                                  style: TextStyle(
-                                    color: Color(0xFFC89E35),
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                              ],
+                      TextButton(
+                        onPressed:
+                            () =>
+                                Navigator.pushNamed(context, AppRoutes.signUp),
+                        child: const Text.rich(
+                          TextSpan(
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Color(0xFF8A9AB3),
                             ),
+                            children: [
+                              TextSpan(text: 'アカウントをお持ちでないですか？ '),
+                              TextSpan(
+                                text: '新規登録',
+                                style: TextStyle(
+                                  color: Color(0xFFC89E35),
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
@@ -194,57 +167,6 @@ class LogInView extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _LineInputField extends StatelessWidget {
-  const _LineInputField({
-    required this.label,
-    required this.lineColor,
-    this.suffixIcon,
-  });
-
-  final String label;
-  final Color lineColor;
-  final Widget? suffixIcon;
-
-  @override
-  Widget build(BuildContext context) {
-    return TextField(
-      style: const TextStyle(fontSize: 16, color: Color(0xFF2A3653)),
-      decoration: InputDecoration(
-        hintText: label,
-        hintStyle: const TextStyle(fontSize: 21, color: Color(0xFF8A9AB3)),
-        suffixIcon: suffixIcon,
-        contentPadding: const EdgeInsets.only(bottom: 16),
-        enabledBorder: UnderlineInputBorder(
-          borderSide: BorderSide(color: lineColor, width: 1.4),
-        ),
-        focusedBorder: const UnderlineInputBorder(
-          borderSide: BorderSide(color: Color(0xFFB8A16E), width: 1.4),
-        ),
-      ),
-    );
-  }
-}
-
-class _SocialCircle extends StatelessWidget {
-  const _SocialCircle({required this.icon});
-
-  final IconData icon;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 64,
-      height: 64,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(color: const Color(0xFFDDE3ED), width: 1.2),
-        color: const Color(0xFFF8FAFC),
-      ),
-      child: Icon(icon, color: const Color(0xFF9AA8BE), size: 28),
     );
   }
 }
