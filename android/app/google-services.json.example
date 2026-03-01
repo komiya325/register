@@ -1,0 +1,4 @@
+{
+  "_comment": "Firebase ConsoleからAndroidアプリ用google-services.jsonをダウンロードし、このファイル名をgoogle-services.jsonにして配置してください。",
+  "_path": "android/app/google-services.json"
+}
