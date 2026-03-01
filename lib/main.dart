@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import 'routes.dart';
-import 'views/first_view.dart';
-import 'views/log_in_view.dart';
-import 'views/sign_up_view.dart';
+import 'core/app_routes.dart';
+import 'view/first_view.dart';
+import 'view/log_in_view.dart';
+import 'view/sign_up_view.dart';
 
 void main() {
   runApp(const RegisterApp());

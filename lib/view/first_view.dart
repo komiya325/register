@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../routes.dart';
+import '../core/app_routes.dart';
 
 class FirstView extends StatelessWidget {
   const FirstView({super.key});
